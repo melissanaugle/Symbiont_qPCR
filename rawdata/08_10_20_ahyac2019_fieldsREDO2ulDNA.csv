@@ -1,0 +1,38 @@
+File Name,08_10_20_ahyac2019_fieldsREDO2ulDNA.pcrd,,,
+Created By User,admin,,,
+Notes,,,,
+ID,,,,
+Run Started,08/10/2020 19:02:26 UTC,,,
+Run Ended,08/10/2020 20:32:09 UTC,,,
+Sample Vol,10,,,
+Lid Temp,105,,,
+Protocol File Name,SymbiodiniumCD_MN.prcl,,,
+Plate Setup File Name,08_10_20_ahyac2019_fieldsREDO2ulDNA.pltd,,,
+Base Serial Number,CT016393,,,
+Optical Head Serial Number,785BR12182,,,
+CFX Manager Version,3.1.1517.0823. ,,,
+,,,,
+Well group,All Wells,,,
+Amplification step,4,,,
+Melt step,,,,
+,,,,
+,,,,
+Well,Fluor,Content,Sample,Cq
+B02,FAM,Unkn,Can1,25.3768921916006
+B03,FAM,Unkn,Coco1,27.0021982073637
+B04,FAM,Unkn,Alu1,23.5889555984285
+B05,FAM,Unkn,Alu2,26.5310501288006
+B06,FAM,Unkn,Tele1,22.3465373901788
+B07,FAM,Unkn,Tele2,26.9086096812018
+B08,FAM,Unkn,Vat1,25.2193614946411
+B09,FAM,Neg Ctrl,NC,NaN
+B10,FAM,Unkn,Vat2,25.9042686618966
+B02,VIC,Unkn,Can1,NaN
+B03,VIC,Unkn,Coco1,NaN
+B04,VIC,Unkn,Alu1,NaN
+B05,VIC,Unkn,Alu2,37.5411162692265
+B06,VIC,Unkn,Tele1,29.0747631676693
+B07,VIC,Unkn,Tele2,21.9994485403147
+B08,VIC,Unkn,Vat1,NaN
+B09,VIC,Neg Ctrl,NC,NaN
+B10,VIC,Unkn,Vat2,NaN

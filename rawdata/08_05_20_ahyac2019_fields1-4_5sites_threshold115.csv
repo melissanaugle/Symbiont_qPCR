@@ -1,0 +1,146 @@
+File Name,08_05_20_ahyac2019_fields1-4_5sites.pcrd,,,,
+Created By User,admin,,,,
+Notes,,,,,
+ID,,,,,
+Run Started,08/05/2020 19:15:35 UTC,,,,
+Run Ended,08/05/2020 20:46:20 UTC,,,,
+Sample Vol,10,,,,
+Lid Temp,105,,,,
+Protocol File Name,SymbiodiniumCD_MN.prcl,,,,
+Plate Setup File Name,08_05_20_ahyac2019_fields1-4_5sites.pltd,,,,
+Base Serial Number,CT016393,,,,
+Optical Head Serial Number,785BR12182,,,,
+CFX Manager Version,3.1.1517.0823. ,,,,
+,,,,,
+Well group,All Wells,,,,
+Amplification step,4,,,,
+Melt step,,,,,
+,,,,,
+,,,,,
+Well,Fluor,Target,Content,Sample,Cq
+A01,FAM,,Unkn,CanII_F1,27.04127689
+A02,FAM,,Unkn,CanII_F1,27.34883525
+A03,FAM,,Unkn,CanII_F1,26.98701277
+A04,FAM,,Unkn,CanII_F2,25.8342627
+A05,FAM,,Unkn,CanII_F2,26.41350236
+A06,FAM,,Unkn,CanII_F2,26.10104139
+A07,FAM,,Unkn,CanII_F3,28.93549694
+A08,FAM,,Unkn,CanII_F3,28.72423389
+A09,FAM,,Unkn,CanII_F3,28.98010373
+A10,FAM,,Unkn,CanII_F4,26.25530269
+A11,FAM,,Unkn,CanII_F4,26.25361118
+A12,FAM,,Unkn,CanII_F4,26.29718833
+B01,FAM,,Unkn,CocoII_F1,28.61505461
+B02,FAM,,Unkn,CocoII_F1,28.5827304
+B03,FAM,,Unkn,CocoII_F1,28.85273856
+B04,FAM,,Unkn,CocoII_F2,28.1072255
+B05,FAM,,Unkn,CocoII_F2,27.88409186
+B06,FAM,,Unkn,CocoII_F2,28.15262492
+B07,FAM,,Unkn,CocoII_F3,24.04747289
+B08,FAM,,Unkn,CocoII_F3,23.64629044
+B09,FAM,,Unkn,CocoII_F3,23.97619573
+B10,FAM,,Unkn,CocoII_F4,24.28030484
+B11,FAM,,Unkn,CocoII_F4,24.16774968
+B12,FAM,,Unkn,CocoII_F4,23.28756196
+C01,FAM,,Unkn,Alu_F1,25.08543183
+C02,FAM,,Unkn,Alu_F1,25.24105286
+C03,FAM,,Unkn,Alu_F1,24.8999868
+C04,FAM,,Unkn,Alu_F2,27.31642066
+C05,FAM,,Unkn,Alu_F2,27.35893917
+C06,FAM,,Unkn,Alu_F2,27.7709042
+C07,FAM,,Unkn,Alu_F3,25.59757532
+C08,FAM,,Unkn,Alu_F3,26.10106072
+C09,FAM,,Unkn,Alu_F3,26.11190443
+C10,FAM,,Unkn,Alu_F4,23.76768556
+C11,FAM,,Unkn,Alu_F4,23.70977707
+C12,FAM,,Unkn,Alu_F4,NaN
+D01,FAM,,Unkn,Tele_F1,23.77399189
+D02,FAM,,Unkn,Tele_F1,23.7076819
+D03,FAM,,Unkn,Tele_F1,24.10058933
+D04,FAM,,Unkn,Tele_F2,27.8632728
+D05,FAM,,Unkn,Tele_F2,27.83299494
+D06,FAM,,Unkn,Tele_F2,27.8456923
+D07,FAM,,Unkn,Tele_F3,25.16948482
+D08,FAM,,Unkn,Tele_F3,25.0300086
+D09,FAM,,Unkn,Tele_F3,24.44348306
+D10,FAM,,Unkn,Tele_F4,26.33151233
+D11,FAM,,Unkn,Tele_F4,26.0389141
+D12,FAM,,Unkn,Tele_F4,26.54477138
+E01,FAM,,Unkn,Vat_F1,25.95065799
+E02,FAM,,Unkn,Vat_F1,26.0507562
+E03,FAM,,Unkn,Vat_F1,25.69500414
+E04,FAM,,Unkn,Vat_F2,27.14372207
+E05,FAM,,Unkn,Vat_F2,27.35573421
+E06,FAM,,Unkn,Vat_F2,27.29115377
+E07,FAM,,Unkn,Vat_F3,24.18802969
+E08,FAM,,Unkn,Vat_F3,24.39040757
+E09,FAM,,Unkn,Vat_F3,24.4345185
+E10,FAM,,Unkn,Vat_F4,26.50871248
+E11,FAM,,Unkn,Vat_F4,26.46014408
+E12,FAM,,Unkn,Vat_F4,26.39828779
+F01,FAM,,Neg Ctrl,negativecontrol,NaN
+F02,FAM,,Neg Ctrl,negativecontrol,NaN
+F03,FAM,,Neg Ctrl,negativecontrol,NaN
+A01,VIC,,Unkn,CanII_F1,NaN
+A02,VIC,,Unkn,CanII_F1,NaN
+A03,VIC,,Unkn,CanII_F1,NaN
+A04,VIC,,Unkn,CanII_F2,NaN
+A05,VIC,,Unkn,CanII_F2,NaN
+A06,VIC,,Unkn,CanII_F2,NaN
+A07,VIC,,Unkn,CanII_F3,NaN
+A08,VIC,,Unkn,CanII_F3,NaN
+A09,VIC,,Unkn,CanII_F3,NaN
+A10,VIC,,Unkn,CanII_F4,NaN
+A11,VIC,,Unkn,CanII_F4,NaN
+A12,VIC,,Unkn,CanII_F4,NaN
+B01,VIC,,Unkn,CocoII_F1,NaN
+B02,VIC,,Unkn,CocoII_F1,NaN
+B03,VIC,,Unkn,CocoII_F1,NaN
+B04,VIC,,Unkn,CocoII_F2,NaN
+B05,VIC,,Unkn,CocoII_F2,NaN
+B06,VIC,,Unkn,CocoII_F2,NaN
+B07,VIC,,Unkn,CocoII_F3,NaN
+B08,VIC,,Unkn,CocoII_F3,NaN
+B09,VIC,,Unkn,CocoII_F3,NaN
+B10,VIC,,Unkn,CocoII_F4,NaN
+B11,VIC,,Unkn,CocoII_F4,NaN
+B12,VIC,,Unkn,CocoII_F4,NaN
+C01,VIC,,Unkn,Alu_F1,NaN
+C02,VIC,,Unkn,Alu_F1,NaN
+C03,VIC,,Unkn,Alu_F1,NaN
+C04,VIC,,Unkn,Alu_F2,37.76619495
+C05,VIC,,Unkn,Alu_F2,37.30290033
+C06,VIC,,Unkn,Alu_F2,NaN
+C07,VIC,,Unkn,Alu_F3,NaN
+C08,VIC,,Unkn,Alu_F3,NaN
+C09,VIC,,Unkn,Alu_F3,NaN
+C10,VIC,,Unkn,Alu_F4,NaN
+C11,VIC,,Unkn,Alu_F4,NaN
+C12,VIC,,Unkn,Alu_F4,NaN
+D01,VIC,,Unkn,Tele_F1,30.79151004
+D02,VIC,,Unkn,Tele_F1,30.44133736
+D03,VIC,,Unkn,Tele_F1,30.99671082
+D04,VIC,,Unkn,Tele_F2,22.47570765
+D05,VIC,,Unkn,Tele_F2,22.27848392
+D06,VIC,,Unkn,Tele_F2,22.41561833
+D07,VIC,,Unkn,Tele_F3,26.57804676
+D08,VIC,,Unkn,Tele_F3,26.23134657
+D09,VIC,,Unkn,Tele_F3,25.89300749
+D10,VIC,,Unkn,Tele_F4,37.55676867
+D11,VIC,,Unkn,Tele_F4,36.62711047
+D12,VIC,,Unkn,Tele_F4,39.03243817
+E01,VIC,,Unkn,Vat_F1,NaN
+E02,VIC,,Unkn,Vat_F1,NaN
+E03,VIC,,Unkn,Vat_F1,NaN
+E04,VIC,,Unkn,Vat_F2,NaN
+E05,VIC,,Unkn,Vat_F2,NaN
+E06,VIC,,Unkn,Vat_F2,NaN
+E07,VIC,,Unkn,Vat_F3,NaN
+E08,VIC,,Unkn,Vat_F3,NaN
+E09,VIC,,Unkn,Vat_F3,NaN
+E10,VIC,,Unkn,Vat_F4,NaN
+E11,VIC,,Unkn,Vat_F4,NaN
+E12,VIC,,Unkn,Vat_F4,NaN
+F01,VIC,,Neg Ctrl,negativecontrol,NaN
+F02,VIC,,Neg Ctrl,negativecontrol,NaN
+F03,VIC,,Neg Ctrl,negativecontrol,NaN
