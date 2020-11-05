@@ -3,7 +3,7 @@ rm( list = ls())
 graphics.off()
 library(ggplot2)
 library(ggpubr)
-require(plyr)
+library(plyr)
 library(dplyr)
 library(reshape2)
 library(mosaic)
@@ -94,7 +94,7 @@ replicate_means <- dat %>%
   summarize(FAM_mean = mean(FAM), VIC_mean = mean(VIC)) %>%
   filter(!Site == "")
 
-replicate_means$CD_logratio <- log(replicate_means$VIC_mean / replicate_means$FAM_mean)
+replicate_means$CD_ratio <- (replicate_means$VIC_mean / replicate_means$FAM_mean)
 
 #lower ratio means more C, higher means more D 
 

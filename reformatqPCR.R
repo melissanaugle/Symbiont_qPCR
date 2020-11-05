@@ -7,9 +7,11 @@ data <- read.csv("rawdata/08_05_20_ahyac2019_fields1-4_5sites_threshold115.csv",
 head(data)
 colnames(data) <- as.character(unlist(data[20,]))
 data <- data[-c(1:20),]
+head(data)
+tail(data)
 
 data <- spread(data, Fluor, Cq)
-data
+head(data)
 
 #confirm neg control 
 data %>%
