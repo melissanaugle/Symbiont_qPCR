@@ -1,0 +1,79 @@
+---
+title: "Symbiont_phys_correlation"
+author: "Melissa Naugle"
+date: "4/19/2021"
+output: html_document
+---
+
+
+```{r readdata}
+setwd(dir = "~/Desktop/GitHub/Symbiont_qPCR/")
+rm( list = ls())
+graphics.off()
+library(ggplot2)
+library(ggpubr)
+require(plyr)
+library(dplyr)
+library(corrplot)
+
+pam <- read.csv("/Users/Melissa/Desktop/GitHub/CBASS_bleachingdata/raw data sheets/PAM_data_normalized.csv")
+pam$SiteColony <- paste(pam$Site, pam$Colony)
+pam$t35_normalizedto28_pam <- pam$t35_normalizedto28
+pam <- select(pam, "SiteColony", "t35_normalizedto28_pam")
+pam <- pam %>% 
+  group_by(SiteColony) %>%
+  summarise(mean_t35_normalizedto28_pam = mean(t35_normalizedto28_pam)) 
+
+avgred <- read.csv("/Users/Melissa/Desktop/GitHub/CBASS_bleachingdata/raw data sheets/AverageRedData_normalized.csv")
+avgred$SiteColony <- paste(avgred$Site, avgred$Colony)
+avgred$t35_normalizedto28_avgred <- avgred$t35_normalizedto28
+avgred <- select(avgred, "SiteColony", "t35_normalizedto28_avgred")
+avgred <- avgred %>% 
+  group_by(SiteColony) %>%
+  summarise(mean_t35_normalizedto28_avgred = mean(t35_normalizedto28_avgred)) 
+
+symbionts <- read.csv("/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/cleandata/symbiont_log_ratios.csv")
+#add colony number to symbiont sheet
+Colony <- data.frame(do.call('rbind', strsplit(as.character(symbionts$Sample), "F", fixed = T)))
+symbionts$Colony <- Colony$X2
+symbionts$SiteColony <- paste(symbionts$Site, symbionts$Colony)
+symbionts <- select(symbionts, "SiteColony", "D_prop", "C_prop", "cellnum_D", "cellnum_C")
+
+data <- merge(pam, avgred, all = T)
+data <- merge(data, symbionts, all = T)
+```
+
+```{r analysis}
+p1 = ggplot(data, aes(x=C_prop)) + geom_line(aes(y=mean_t35_normalizedto28_pam), color="blue") + xlab("Log Proportion of Cladocopium") + ylab("Mean PAM Fv/Fm") + theme_bw()  + ylim(-0.06,0.05) + geom_point(data=data,aes(x=C_prop,y=mean_t35_normalizedto28_pam))
+p2 = ggplot(data, aes(x=C_prop)) + geom_line(aes(y=mean_t35_normalizedto28_avgred), color="red") + xlab("Log Proportion of Cladocopium") + ylab("Mean Average Red Intensity") + theme_bw()  + geom_point(data=data,aes(x=C_prop,y=mean_t35_normalizedto28_avgred))
+p3 = ggplot(data, aes(x=C_prop)) + geom_line(aes(y=mean_t35_normalizedto28_pam), color="blue") + xlab("Log Proportion of Cladocopium") + ylab("Mean PAM Fv/Fm") + theme_bw() + xlim(0.087, 0.1) + ylim(-0.06,0.05) + geom_point(data=data,aes(x=C_prop,y=mean_t35_normalizedto28_pam))
+p4 = ggplot(data, aes(x=C_prop)) + geom_line(aes(y=mean_t35_normalizedto28_avgred), color="red") + xlab("Log Proportion of Cladocopium") + ylab("Mean Average Red Intensity") + theme_bw()  + xlim(0.087, 0.1) + geom_point(data=data,aes(x=C_prop,y=mean_t35_normalizedto28_avgred))
+
+ggarrange(p1,p2,p3,p4)
+
+ggsave("/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/figures/symbiontCprop_bleaching.pdf", width = 6, height = 4)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

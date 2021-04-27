@@ -1,0 +1,205 @@
+---
+title: "qPCR analysis"
+author: "Melissa Naugle"
+date: "3/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+setwd(dir = "~/Desktop/GitHub/Symbiont_qPCR/")
+rm( list = ls())
+graphics.off()
+library(ggplot2)
+library(ggpubr)
+library(plyr)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+library(mosaic)
+library(RColorBrewer)
+
+```
+
+```{r readdata}
+dat1 <- read.csv("cleandata/08_05_20_fields1-4.csv")
+dat2 <- read.csv("cleandata/10_14_20_fields5-8.csv")
+dat3 <- read.csv("cleandata/12_14_20_redos.csv")
+
+dat <- rbind(dat1,dat2)
+nrow(dat)
+
+#remove and replace with redos 
+dat<-dat[!(dat$Sample=="Alu_F2" | dat$Sample=="TeleF5" | dat$Sample=="VatiaF6"),]
+
+dat3 <- dat3[!(dat3$Sample=="AluF4"),]
+dat3$Starting.Quantity..SQ. <- NULL
+dat <- rbind(dat,dat3)
+
+head(dat)
+dat$FAM <- as.numeric(dat$FAM)
+dat$VIC <- as.numeric(dat$VIC)
+dat <- dat[!(dat$Sample=="NC"),]
+
+
+dat$Site = "n"
+
+dat <- mutate(dat, Site = derivedFactor(
+  "Faga'tele" = (grepl("Tele", dat$Sample)),
+  "Faga'alu" = (grepl("Alu", dat$Sample)),
+  "Vatia" = (grepl("Vat", dat$Sample)),
+  "Cannery" = (grepl("Can", dat$Sample)),
+  "Coconut Point" = (grepl("Coco", dat$Sample)),
+  "Neg Control" = (grepl("ontrol", dat$Sample)),
+  method ="first",
+  .default = NA
+))
+
+dat <- dat[!(dat$Site == "Neg Control"),]
+
+```
+
+
+
+
+
+```{r logfirst}
+#try log transforming ct values first, then calc after
+
+dat_log <- dat
+dat_log$FAM_log <- log10(dat_log$FAM)
+dat_log$VIC_log <- log10(dat_log$VIC)
+
+
+dat_ratio_log <- dat_log %>%
+  group_by(Sample, Site) %>%
+  summarize(FAM_log_mean = mean(FAM_log, na.rm = TRUE), VIC_log_mean = mean(VIC_log, na.rm = TRUE))
+dat_ratio_log
+
+
+dat_ratio_log$cellnum_C <- (2^(40 - dat_ratio_log$VIC_log_mean)) / 9
+dat_ratio_log$cellnum_C[is.na(dat_ratio_log$VIC_log_mean)] <- (2^(40-10000000000000))
+dat_ratio_log$cellnum_D <- (2^(40 - dat_ratio_log$FAM_log_mean)) / 1
+
+
+dat_ratio_log$D_prop <- dat_ratio_log$cellnum_D / (dat_ratio_log$cellnum_C + dat_ratio_log$cellnum_D)
+dat_ratio_log$C_prop <- dat_ratio_log$cellnum_C / (dat_ratio_log$cellnum_C + dat_ratio_log$cellnum_D)
+
+dat_ratio_gather <- gather(dat_ratio_log, "Species", "Ratio", 7:8)
+dat_ratio_gather$Ratio <- round(dat_ratio_gather$Ratio, digits = 4)
+
+dat_ratio_log$Site <- factor(dat_ratio_log$Site, levels = c("Cannery", "Coconut Point", "Faga'alu", "Vatia" ,"Faga'tele"))
+
+ggplot(dat_ratio_log, aes(x = Site, y = C_prop, fill = Site)) + geom_violin() + theme_bw()  + 
+  scale_fill_brewer(palette = "Set3") + ylab("Log Proportion of Cladocopium") + xlab("") + geom_dotplot(binaxis='y', stackdir='center', dotsize=0.1, binwidth = 0.04)
+
+#ggsave("figures/symbionts_cprop_03_25_21.pdf", width = 6, height = 4)
+
+#write.csv(dat_ratio_log, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/cleandata/symbiont_log_ratios.csv", row.names = F)
+
+dat_ratio_means <- dat_ratio_log %>%
+  group_by(Site) %>%
+  summarize(D_prop_avg = mean(D_prop), C_prop_avg = mean(C_prop))
+
+dat_ratio_means <- gather(dat_ratio_means, "Species", "Ratio", 2:3)
+dat_ratio_means$logRatio <- dat_ratio_means$Ratio
+
+dat_ratio_means$Site <- factor(dat_ratio_means$Site, levels = c("Cannery", "Coconut Point", "Faga'alu", "Vatia" ,"Faga'tele"))
+
+#plots mean proportions for each site
+ggplot(dat_ratio_means, aes(x = Site, y = logRatio, fill = Species)) + geom_col() + theme_bw()  + ylab("Log Proportion of Durisdinium and Cladocopium") + scale_fill_manual(labels = c("Cladocopium", "Durisdinium"), values = c("violetred2", "royalblue3")) + xlab("") + theme(legend.title = element_blank())
+
+#ggsave("figures/symbionts_logratio_03_25_21.pdf", width = 6, height = 4)
+
+
+```
+C+D corals: 
+Tele 1-6
+Vatia 5-6
+Alu 2
+
+```{r stats}
+
+#no assumptions met 
+
+dat_ratio_log$CDratio_log <- dat_ratio_log$cellnum_C/dat_ratio_log$cellnum_D
+
+shapiro.test(dat_ratio_log$CDratio_log)
+#not normal
+#p = 1.2e-09
+
+shapiro.test(dat_ratio_log$cellnum_D)
+shapiro.test(dat_ratio_log$C_prop)
+shapiro.test(dat_ratio_log$D_prop)
+
+bartlett.test(CDratio_log ~ Site, data=dat_ratio_log)
+#not equal
+#p < 2.2e-16
+
+modelCD = lm(CDratio_log ~ Site, data=dat_ratio_log) 
+anova(modelCD) 
+#very signif 
+shapiro.test(modelCD$residuals)
+#not normal
+TukeyHSD(modelCD,"Site")
+
+
+```
+
+
+
+
+```{r logafter}
+dat_ratio <- dat %>%
+  group_by(Sample, Site) %>%
+  summarize(FAM_mean = mean(FAM, na.rm = TRUE), VIC_mean = mean(VIC, na.rm = TRUE))
+head(dat_ratio)
+
+#not the proper ratio but hehe oh well 
+dat_ratio$CD_ratio <- (dat_ratio$FAM_mean / dat_ratio$VIC_mean)
+dat_ratio$CD_ratio[is.na(dat_ratio$CD_ratio)] <- 0
+
+
+#maybe look at qPCR for other spp to calc ratios 
+#need to log transform 
+#how did tom calc ratios - try to get within same range ?
+
+#The proportion of clade D in each colony was then calculated as D cells/(C cells + D cells), with the number of cells of each clade calculated as 2^(40-avg. CT) divided by the gene copy numbers (Cunning and Baker 2012). from cunning 2013 pf 110
+#prop of D 
+#copy num = 9 and 1 for C and D
+
+
+dat_ratio$cellnum_C <- (2^(40 - dat_ratio$VIC_mean)) / 9
+dat_ratio$cellnum_C[is.na(dat_ratio$cellnum_C)] <- (2^(40-10000000000000))
+dat_ratio$cellnum_D <- (2^(40 - dat_ratio$FAM_mean)) / 1
+
+
+dat_ratio$D_prop <- dat_ratio$cellnum_D / (dat_ratio$cellnum_C + dat_ratio$cellnum_D)
+dat_ratio$C_prop <- dat_ratio$cellnum_C / (dat_ratio$cellnum_C + dat_ratio$cellnum_D)
+
+dat_ratio_gather <- gather(dat_ratio, "Species", "Ratio", 7:8)
+dat_ratio_gather$Ratio <- round(dat_ratio_gather$Ratio, digits = 4)
+
+
+ggplot(dat_ratio, aes(x = Site, y = C_prop, fill = Site)) + geom_boxplot() + theme_bw() + 
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=1, binwidth = 0.04) + 
+  scale_fill_brewer(palette = "Set3") + ylab("Log Proportion of Cladocopium") + xlab("") + scale_y_continuous(trans = 'log10')
+
+
+```
+
+
+```{r nolog}
+dat_ratio$Site <- factor(dat_ratio$Site, levels = c("Cannery", "Coconut Point", "Faga'alu", "Vatia" ,"Faga'tele"))
+
+ggplot(dat_ratio, aes(x = Site, y = CD_ratio, fill = Site)) + geom_violin() + theme_bw() + 
+  geom_dotplot(binaxis='y', stackdir='center', dotsize=1, binwidth = 0.04) + 
+  scale_fill_brewer(palette = "Set3") + ylab("Ratio of Durisdinium to Cladocopium") + xlab("")
+
+#ggsave("figures/symbionts_violin_02_16_21.pdf", width = 6, height = 4)
+
+```
+
+
+
+
+

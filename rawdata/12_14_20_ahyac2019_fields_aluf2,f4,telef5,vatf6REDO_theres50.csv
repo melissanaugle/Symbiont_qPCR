@@ -1,0 +1,50 @@
+File Name,12_14_20_ahyac2019_fields_aluf2_f4_telef5_vatf6REDO.pcrd,,,,,
+Created By User,admin,,,,,
+Notes,,,,,,
+ID,,,,,,
+Run Started,12/14/2020 21:04:13 UTC,,,,,
+Run Ended,12/14/2020 22:34:16 UTC,,,,,
+Sample Vol,10,,,,,
+Lid Temp,105,,,,,
+Protocol File Name,SymbiodiniumCD_MN.prcl,,,,,
+Plate Setup File Name,12_14_20_ahyac2019_fields_aluf2_f4_telef5_vatf6REDO.pltd,,,,,
+Base Serial Number,CT016393,,,,,
+Optical Head Serial Number,785BR12182,,,,,
+CFX Manager Version,3.1.1517.0823. ,,,,,
+,,,,,,
+Well group,All Wells,,,,,
+Amplification step,4,,,,,
+Melt step,,,,,,
+,,,,,,
+,,,,,,
+Well,Fluor,Target,Content,Sample,Cq,Starting Quantity (SQ)
+A01,FAM,,Unkn,AluF2,26.1472132219578,NaN
+A02,FAM,,Unkn,AluF2,26.0642129751324,NaN
+A03,FAM,,Unkn,AluF2,25.9984350647492,NaN
+A04,FAM,,Unkn,AluF4,22.3700745656553,NaN
+A05,FAM,,Unkn,AluF4,22.0364710787054,NaN
+A06,FAM,,Unkn,AluF4,22.2974372422934,NaN
+A07,FAM,,Unkn,TeleF5,29.7848652347529,NaN
+A08,FAM,,Unkn,TeleF5,29.4783173514883,NaN
+A09,FAM,,Unkn,TeleF5,30.1615937842757,NaN
+A10,FAM,,Unkn,VatiaF6,22.295499907981,NaN
+A11,FAM,,Unkn,VatiaF6,22.4647965510701,NaN
+A12,FAM,,Unkn,VatiaF6,22.0692915405995,NaN
+B01,FAM,,Neg Ctrl,NC,NaN,NaN
+B02,FAM,,Neg Ctrl,NC,NaN,NaN
+B03,FAM,,Neg Ctrl,NC,NaN,NaN
+A01,VIC,,Unkn,AluF2,37.072342527122,NaN
+A02,VIC,,Unkn,AluF2,NaN,NaN
+A03,VIC,,Unkn,AluF2,35.105000778692,NaN
+A04,VIC,,Unkn,AluF4,NaN,NaN
+A05,VIC,,Unkn,AluF4,NaN,NaN
+A06,VIC,,Unkn,AluF4,38.0514938231576,NaN
+A07,VIC,,Unkn,TeleF5,34.6757517137687,NaN
+A08,VIC,,Unkn,TeleF5,36.3510308142257,NaN
+A09,VIC,,Unkn,TeleF5,36.0924266688351,NaN
+A10,VIC,,Unkn,VatiaF6,NaN,NaN
+A11,VIC,,Unkn,VatiaF6,35.6915082966481,NaN
+A12,VIC,,Unkn,VatiaF6,35.323051653446,NaN
+B01,VIC,,Neg Ctrl,NC,NaN,NaN
+B02,VIC,,Neg Ctrl,NC,NaN,NaN
+B03,VIC,,Neg Ctrl,NC,NaN,NaN
