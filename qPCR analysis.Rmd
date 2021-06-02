@@ -17,8 +17,14 @@ library(tidyr)
 library(reshape2)
 library(mosaic)
 library(RColorBrewer)
-
+library(DescTools)
+library(epitools)
 ```
+
+Background: These data show the ratio of species 'C' and 'D' symbionts, cell number of each symbiont, and proportion of each symbiont within corals from different sites. I want to test if symbionts are different by site (which I'm pretty sure they are based on the graph but would like to stats to show it)
+
+
+# Read in data
 
 ```{r readdata}
 dat1 <- read.csv("cleandata/08_05_20_fields1-4.csv")
@@ -40,7 +46,6 @@ dat$FAM <- as.numeric(dat$FAM)
 dat$VIC <- as.numeric(dat$VIC)
 dat <- dat[!(dat$Sample=="NC"),]
 
-
 dat$Site = "n"
 
 dat <- mutate(dat, Site = derivedFactor(
@@ -49,106 +54,16 @@ dat <- mutate(dat, Site = derivedFactor(
   "Vatia" = (grepl("Vat", dat$Sample)),
   "Cannery" = (grepl("Can", dat$Sample)),
   "Coconut Point" = (grepl("Coco", dat$Sample)),
-  "Neg Control" = (grepl("ontrol", dat$Sample)),
-  method ="first",
   .default = NA
 ))
 
-dat <- dat[!(dat$Site == "Neg Control"),]
-
+dat <- dat[!is.na(dat$Site),]
 ```
 
 
+# Calculate ratio of C to D symbionts, cell number of each symbiont, and proportion of each symbiont
 
-
-
-```{r logfirst}
-#try log transforming ct values first, then calc after
-
-dat_log <- dat
-dat_log$FAM_log <- log10(dat_log$FAM)
-dat_log$VIC_log <- log10(dat_log$VIC)
-
-
-dat_ratio_log <- dat_log %>%
-  group_by(Sample, Site) %>%
-  summarize(FAM_log_mean = mean(FAM_log, na.rm = TRUE), VIC_log_mean = mean(VIC_log, na.rm = TRUE))
-dat_ratio_log
-
-
-dat_ratio_log$cellnum_C <- (2^(40 - dat_ratio_log$VIC_log_mean)) / 9
-dat_ratio_log$cellnum_C[is.na(dat_ratio_log$VIC_log_mean)] <- (2^(40-10000000000000))
-dat_ratio_log$cellnum_D <- (2^(40 - dat_ratio_log$FAM_log_mean)) / 1
-
-
-dat_ratio_log$D_prop <- dat_ratio_log$cellnum_D / (dat_ratio_log$cellnum_C + dat_ratio_log$cellnum_D)
-dat_ratio_log$C_prop <- dat_ratio_log$cellnum_C / (dat_ratio_log$cellnum_C + dat_ratio_log$cellnum_D)
-
-dat_ratio_gather <- gather(dat_ratio_log, "Species", "Ratio", 7:8)
-dat_ratio_gather$Ratio <- round(dat_ratio_gather$Ratio, digits = 4)
-
-dat_ratio_log$Site <- factor(dat_ratio_log$Site, levels = c("Cannery", "Coconut Point", "Faga'alu", "Vatia" ,"Faga'tele"))
-
-ggplot(dat_ratio_log, aes(x = Site, y = C_prop, fill = Site)) + geom_violin() + theme_bw()  + 
-  scale_fill_brewer(palette = "Set3") + ylab("Log Proportion of Cladocopium") + xlab("") + geom_dotplot(binaxis='y', stackdir='center', dotsize=0.1, binwidth = 0.04)
-
-#ggsave("figures/symbionts_cprop_03_25_21.pdf", width = 6, height = 4)
-
-#write.csv(dat_ratio_log, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/cleandata/symbiont_log_ratios.csv", row.names = F)
-
-dat_ratio_means <- dat_ratio_log %>%
-  group_by(Site) %>%
-  summarize(D_prop_avg = mean(D_prop), C_prop_avg = mean(C_prop))
-
-dat_ratio_means <- gather(dat_ratio_means, "Species", "Ratio", 2:3)
-dat_ratio_means$logRatio <- dat_ratio_means$Ratio
-
-dat_ratio_means$Site <- factor(dat_ratio_means$Site, levels = c("Cannery", "Coconut Point", "Faga'alu", "Vatia" ,"Faga'tele"))
-
-#plots mean proportions for each site
-ggplot(dat_ratio_means, aes(x = Site, y = logRatio, fill = Species)) + geom_col() + theme_bw()  + ylab("Log Proportion of Durisdinium and Cladocopium") + scale_fill_manual(labels = c("Cladocopium", "Durisdinium"), values = c("violetred2", "royalblue3")) + xlab("") + theme(legend.title = element_blank())
-
-#ggsave("figures/symbionts_logratio_03_25_21.pdf", width = 6, height = 4)
-
-
-```
-C+D corals: 
-Tele 1-6
-Vatia 5-6
-Alu 2
-
-```{r stats}
-
-#no assumptions met 
-
-dat_ratio_log$CDratio_log <- dat_ratio_log$cellnum_C/dat_ratio_log$cellnum_D
-
-shapiro.test(dat_ratio_log$CDratio_log)
-#not normal
-#p = 1.2e-09
-
-shapiro.test(dat_ratio_log$cellnum_D)
-shapiro.test(dat_ratio_log$C_prop)
-shapiro.test(dat_ratio_log$D_prop)
-
-bartlett.test(CDratio_log ~ Site, data=dat_ratio_log)
-#not equal
-#p < 2.2e-16
-
-modelCD = lm(CDratio_log ~ Site, data=dat_ratio_log) 
-anova(modelCD) 
-#very signif 
-shapiro.test(modelCD$residuals)
-#not normal
-TukeyHSD(modelCD,"Site")
-
-
-```
-
-
-
-
-```{r logafter}
+```{r calcratios}
 dat_ratio <- dat %>%
   group_by(Sample, Site) %>%
   summarize(FAM_mean = mean(FAM, na.rm = TRUE), VIC_mean = mean(VIC, na.rm = TRUE))
@@ -187,17 +102,65 @@ ggplot(dat_ratio, aes(x = Site, y = C_prop, fill = Site)) + geom_boxplot() + the
 
 ```
 
+# Check assumptions 
+No assumptions are met 
 
-```{r nolog}
-dat_ratio$Site <- factor(dat_ratio$Site, levels = c("Cannery", "Coconut Point", "Faga'alu", "Vatia" ,"Faga'tele"))
 
-ggplot(dat_ratio, aes(x = Site, y = CD_ratio, fill = Site)) + geom_violin() + theme_bw() + 
-  geom_dotplot(binaxis='y', stackdir='center', dotsize=1, binwidth = 0.04) + 
-  scale_fill_brewer(palette = "Set3") + ylab("Ratio of Durisdinium to Cladocopium") + xlab("")
+```{r stats}
 
-#ggsave("figures/symbionts_violin_02_16_21.pdf", width = 6, height = 4)
+#no assumptions met 
+
+shapiro.test(dat_ratio$C_prop)
+#not normal
+#p = 2.05e-09
+
+bartlett.test(CD_ratio ~ Site, data=dat_ratio)
+#not equal
+#p < 2.2e-16
+```
+```{r contingency}
+dat_ratio$community_type <- "D only"
+
+dat_ratio$community_type[which(dat_ratio$C_prop > 0)] <- "C and D" 
+
+dat_contingency <- dat_ratio %>%
+  select(1,2,10)
+
+
+table <- table(dat_contingency$Site, dat_contingency$community_type)
+table
+
+savechisq <- chisq.test(table)
+savechisq
+#expected frequencies under null hypothesis
+addmargins(savechisq$expected)
+
+#since expected freqs <5 in >80% of cells, cannot run chisq or Gtest 
+#GTest(dat_contingency$Site, dat_contingency$community_type)
+#chisq.test(dat_contingency$Site, dat_contingency$community_type)
+
+#can run fishers exact?
+fisher.test(table)
+#p = 0.001327
+
+
+
+#all show signif p values 
+
+mosaicplot( t(table), col = c("cornflowerblue", "palegreen", "goldenrod1", "darkorange", "firebrick"), cex.axis = 1,las = 1, sub = "Symbiont Community", ylab = "Site", main = "")
+
+#oddsratio(table, method = "wald")
+
+
 
 ```
+
+
+
+C+D corals: 
+Tele 1-6
+Vatia 5-6
+Alu 2
 
 
 
