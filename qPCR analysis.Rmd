@@ -60,47 +60,54 @@ dat <- mutate(dat, Site = derivedFactor(
 dat <- dat[!is.na(dat$Site),]
 ```
 
+```{r}
+#try log transforming ct values first, then calc after
 
-# Calculate ratio of C to D symbionts, cell number of each symbiont, and proportion of each symbiont
+dat_log <- dat
+dat_log$FAM_log <- log10(dat_log$FAM)
+dat_log$VIC_log <- log10(dat_log$VIC)
 
-```{r calcratios}
-dat_ratio <- dat %>%
+
+dat_ratio_log <- dat_log %>%
   group_by(Sample, Site) %>%
-  summarize(FAM_mean = mean(FAM, na.rm = TRUE), VIC_mean = mean(VIC, na.rm = TRUE))
-head(dat_ratio)
-
-#not the proper ratio but hehe oh well 
-dat_ratio$CD_ratio <- (dat_ratio$FAM_mean / dat_ratio$VIC_mean)
-dat_ratio$CD_ratio[is.na(dat_ratio$CD_ratio)] <- 0
+  summarize(FAM_log_mean = mean(FAM_log, na.rm = TRUE), VIC_log_mean = mean(VIC_log, na.rm = TRUE))
+dat_ratio_log
 
 
-#maybe look at qPCR for other spp to calc ratios 
-#need to log transform 
-#how did tom calc ratios - try to get within same range ?
-
-#The proportion of clade D in each colony was then calculated as D cells/(C cells + D cells), with the number of cells of each clade calculated as 2^(40-avg. CT) divided by the gene copy numbers (Cunning and Baker 2012). from cunning 2013 pf 110
-#prop of D 
-#copy num = 9 and 1 for C and D
+dat_ratio_log$cellnum_C <- (2^(40 - dat_ratio_log$VIC_log_mean)) / 9
+dat_ratio_log$cellnum_C[is.na(dat_ratio_log$VIC_log_mean)] <- (2^(40-10000000000000))
+dat_ratio_log$cellnum_D <- (2^(40 - dat_ratio_log$FAM_log_mean)) / 1
 
 
-dat_ratio$cellnum_C <- (2^(40 - dat_ratio$VIC_mean)) / 9
-dat_ratio$cellnum_C[is.na(dat_ratio$cellnum_C)] <- (2^(40-10000000000000))
-dat_ratio$cellnum_D <- (2^(40 - dat_ratio$FAM_mean)) / 1
+dat_ratio_log$D_prop <- dat_ratio_log$cellnum_D / (dat_ratio_log$cellnum_C + dat_ratio_log$cellnum_D)
+dat_ratio_log$C_prop <- dat_ratio_log$cellnum_C / (dat_ratio_log$cellnum_C + dat_ratio_log$cellnum_D)
 
-
-dat_ratio$D_prop <- dat_ratio$cellnum_D / (dat_ratio$cellnum_C + dat_ratio$cellnum_D)
-dat_ratio$C_prop <- dat_ratio$cellnum_C / (dat_ratio$cellnum_C + dat_ratio$cellnum_D)
-
-dat_ratio_gather <- gather(dat_ratio, "Species", "Ratio", 7:8)
+dat_ratio_gather <- gather(dat_ratio_log, "Species", "Ratio", 7:8)
 dat_ratio_gather$Ratio <- round(dat_ratio_gather$Ratio, digits = 4)
 
+colors = c("royalblue2", "palegreen2", "lightblue", "tomato3", "firebrick4")
 
-ggplot(dat_ratio, aes(x = Site, y = C_prop, fill = Site)) + geom_boxplot() + theme_bw() + 
-  geom_dotplot(binaxis='y', stackdir='center', dotsize=1, binwidth = 0.04) + 
-  scale_fill_brewer(palette = "Set3") + ylab("Log Proportion of Cladocopium") + xlab("") + scale_y_continuous(trans = 'log10')
+ggplot(dat_ratio_log, aes(x = Site, y = C_prop, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Proportion of \n Cladocopium") + xlab("") + geom_point(shape = 21, position = position_jitter(width = 0.02), size = 3.5, aes(fill = Site))  + scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" )) + scale_color_manual(values = colors) + scale_fill_manual(values = colors) +theme(text=element_text(size=19), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 17))
 
+ggsave("figures/icrs_newsymbiontfig.png", width = 6, height = 4)
+
+#write.csv(dat_ratio_log, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/cleandata/symbiont_log_ratios.csv", row.names = F)
+
+dat_ratio_means <- dat_ratio_log %>%
+  group_by(Site) %>%
+  summarize(D_prop_avg = mean(D_prop), C_prop_avg = mean(C_prop))
+
+dat_ratio_means <- gather(dat_ratio_means, "Species", "Ratio", 2:3)
+dat_ratio_means$logRatio <- dat_ratio_means$Ratio
+
+
+#plots mean proportions for each site
+ggplot(dat_ratio_means, aes(x = Site, y = logRatio, fill = Species)) + geom_col() + theme_bw()  + ylab("Log Proportion of Durisdinium and Cladocopium") + scale_fill_manual(labels = c("Cladocopium", "Durisdinium"), values = c("violetred2", "royalblue3")) + xlab("") + theme(legend.title = element_blank())
+
+#ggsave("figures/symbionts_logratio_03_25_21.pdf", width = 6, height = 4)
 
 ```
+
 
 # Check assumptions 
 No assumptions are met 
