@@ -87,9 +87,10 @@ dat_ratio_gather$Ratio <- round(dat_ratio_gather$Ratio, digits = 4)
 
 colors = c("royalblue2", "palegreen2", "lightblue", "tomato3", "firebrick4")
 
-ggplot(dat_ratio_log, aes(x = Site, y = C_prop, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Proportion of \n Cladocopium") + xlab("") + geom_point(shape = 21, position = position_jitter(width = 0.02), size = 3.5, aes(fill = Site))  + scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" )) + scale_color_manual(values = colors) + scale_fill_manual(values = colors) +theme(text=element_text(size=19), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 17))
+ggplot(dat_ratio_log, aes(x = Site, y = C_prop, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Proportion of Cladocopium") + xlab("") + geom_point(shape = 21, position = position_jitter(width = 0.02), size = 3.5, aes(fill = Site))  + scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" )) + scale_color_manual(values = colors) + scale_fill_manual(values = colors) +theme(text=element_text(size=16), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 19))
 
-ggsave("figures/icrs_newsymbiontfig.png", width = 6, height = 4)
+#ggsave("figures/thesis_newsymbiontfig.png", width = 6, height = 4)
+
 
 #write.csv(dat_ratio_log, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/cleandata/symbiont_log_ratios.csv", row.names = F)
 
@@ -126,12 +127,12 @@ bartlett.test(CD_ratio ~ Site, data=dat_ratio)
 #p < 2.2e-16
 ```
 ```{r contingency}
-dat_ratio$community_type <- "D only"
+dat_ratio_log$community_type <- "D only"
 
-dat_ratio$community_type[which(dat_ratio$C_prop > 0)] <- "C and D" 
+dat_ratio_log$community_type[which(dat_ratio_log$C_prop > 0)] <- "C and D" 
 
-dat_contingency <- dat_ratio %>%
-  select(1,2,10)
+dat_contingency <- dat_ratio_log %>%
+  select(1,2,9)
 
 
 table <- table(dat_contingency$Site, dat_contingency$community_type)
@@ -146,7 +147,7 @@ addmargins(savechisq$expected)
 #GTest(dat_contingency$Site, dat_contingency$community_type)
 #chisq.test(dat_contingency$Site, dat_contingency$community_type)
 
-#can run fishers exact?
+#can run fishers exact
 fisher.test(table)
 #p = 0.001327
 
