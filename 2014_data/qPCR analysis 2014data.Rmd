@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 #change this to match path on your machine 
-setwd(dir = "~/Desktop/GitHub/Symbiont_qPCR/")
+setwd(dir = "~/Desktop/GitHub/Symbiont_qPCR/2014_data/")
 rm( list = ls())
 graphics.off()
 library(tidyverse)
@@ -26,6 +26,7 @@ site_info <- read.csv("2014 Ahyac sample info - Sheet1.csv")
 #create list of clean data filenames 
 #must keep files to analyze in folder called "cleandata" 
 temp = list.files(path = "cleandata", pattern="*.csv", full.names = T)
+temp
 
 #read csv files all at once
 dat <- sapply(temp, read.csv, simplify=FALSE) %>%
@@ -48,9 +49,13 @@ dat$Number <- parse_number(dat$Sample)
 #add site and month info
 dat_sites <- merge(dat, site_info, by = "Number")
 
+#create site/month variable
+dat_sites$Site_month <- paste(dat_sites$Site, dat_sites$Season)
+
 #look at data
 dat_sites
 ```
+
 #Calculate CD ratio
 
 ```{r analysis}
@@ -59,14 +64,16 @@ dat_sites
 #this removes NAs
 #be careful with samples that didn't amplify across triplicate
 dat_trip <- dat_sites %>%
-  group_by(Sample, Site) %>%
+  group_by(Sample, Site_month) %>%
   summarize(FAM_mean = mean(FAM, na.rm = TRUE), VIC_mean = mean(VIC, na.rm = TRUE))
 
 #look at data
 dat_trip
 
 #use this formula to calculate cell number for C and D
+#divide by cell copy number 
 dat_trip$cellnum_C <- (2^(40 - dat_trip$VIC_mean)) / 9
+dat_trip$cellnum_C[is.na(dat_trip$VIC_mean)] <- (2^(40-10000000000000))
 dat_trip$cellnum_D <- (2^(40 - dat_trip$FAM_mean)) / 1
 
 #look at data
@@ -86,18 +93,24 @@ dat_trip$CDratio_log <- log(dat_trip$cellnum_C / dat_trip$cellnum_D)
 dat_trip
 
 #plot C:D log ratio
-ggplot(dat_trip, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log C:D Ratio \n more negative = more D \n more positive = more C") + xlab("") + geom_point(shape = 21, position = position_jitter(width = 0.001), size = 3.5, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))
+ggplot(dat_trip, aes(x = Site_month, y = CDratio_log, fill = Site_month)) + geom_violin() + theme_bw() + ylab("Log C:D Ratio \n more negative = more D \n more positive = more C") + xlab("") + geom_point(shape = 21, position = position_jitter(width = 0.001), size = 3.5, aes(fill = Site_month))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))
 
 #ggsave("figures/C_prop_07_06_2021.pdf", width = 6, height = 4)
 
 #write.csv(dat_trip, "symbiont_CD_data.csv", row.names = F)
 
 ```
+
+
+
+
+
+
 ```{r stats}
 
 #test for normality
-shapiro.test(dat_log_trip$C_prop) #normal so far
-shapiro.test(dat_log_trip$CDratio) #normal so far
+shapiro.test(dat_trip$C_prop) #normal so far
+shapiro.test(dat_trip$CDratio) #normal so far
 
 #test for equal variances
 bartlett.test(C_prop ~ Site, data=dat_log_trip) # not equal yet 
