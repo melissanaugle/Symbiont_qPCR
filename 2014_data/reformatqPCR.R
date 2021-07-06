@@ -1,10 +1,10 @@
-setwd(dir = "~/Desktop/GitHub/Symbiont_qPCR/")
+setwd(dir = "~/Desktop/GitHub/Symbiont_qPCR/2014_data/")
 rm( list = ls())
 graphics.off()
 library(tidyr)
 
 #enter your raw output from the qPCR machine here as csv 
-data <- read.csv("rawdata/2014data/2014data_04_26_21_ahyac31-36,38-43_50th.csv", header = F)
+data <- read.csv("rawdata/04_26_21_ahyac31-36,38-43_50th.csv", header = F)
 head(data)
 colnames(data) <- as.character(unlist(data[20,]))
 #remove header rows with metadata
@@ -21,7 +21,7 @@ data %>%
 #check that theres no value for these in FAM or VIC columns 
 
 #remove negative controls 
-data <- data[!(dat$Content == "Neg Ctrl"),]
+data <- data[!(data$Content == "Neg Ctrl"),]
 
 #remve columns we dont need 
 data$Target <- NULL
@@ -35,4 +35,4 @@ tail(data)
 
 
 #write CSV
-#write.csv(data,"cleandata/2014data/2014data_clean_04_26_21_ahyac31-36,38-43_50th.csv", row.names = F)
+write.csv(data,"cleandata/clean_04_26_21_ahyac31-36,38-43_50th.csv", row.names = F)

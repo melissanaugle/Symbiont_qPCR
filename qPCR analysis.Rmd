@@ -87,7 +87,7 @@ dat_ratio_gather$Ratio <- round(dat_ratio_gather$Ratio, digits = 4)
 
 colors = c("royalblue2", "palegreen2", "lightblue", "tomato3", "firebrick4")
 
-ggplot(dat_ratio_log, aes(x = Site, y = C_prop, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Proportion of Cladocopium") + xlab("") + geom_point(shape = 21, position = position_jitter(width = 0.02), size = 3.5, aes(fill = Site))  + scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" )) + scale_color_manual(values = colors) + scale_fill_manual(values = colors) +theme(text=element_text(size=16), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 19))
+ggplot(dat_ratio_log, aes(x = Site, y = C_prop, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Proportion of Cladocopium") + xlab("") + geom_point(shape = 21, position = position_jitter(width = 0.02), size = 3.5, aes(fill = Site))  + scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" )) + scale_color_manual(values = colors) + scale_fill_manual(values = colors) +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))
 
 #ggsave("figures/thesis_newsymbiontfig.png", width = 6, height = 4)
 

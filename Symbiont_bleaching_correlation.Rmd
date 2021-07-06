@@ -51,7 +51,10 @@ p4 = ggplot(data, aes(x=C_prop)) + geom_line(aes(y=mean_t35_normalizedto28_avgre
 
 ggarrange(p1,p2,p3,p4)
 
-ggsave("/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/figures/symbiontCprop_bleaching.pdf", width = 6, height = 4)
+cor.test(data$C_prop, data$mean_t35_normalizedto28_avgred, method = "spearman")
+cor.test(data$C_prop, data$mean_t35_normalizedto28_pam, method = "spearman")
+
+#ggsave("/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/figures/symbiontCprop_bleaching.pdf", width = 6, height = 4)
 
 ```
 
