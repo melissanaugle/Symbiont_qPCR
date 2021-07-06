@@ -16,14 +16,7 @@ library(mosaic)
 library(RColorBrewer)
 ```
 
-
-4. write site name for each site 
-5. write sample month 
-6. log transform ct value 
-7. group by sample and site, take mean of log ct 
-8. use equation to calculate cell number, prop C and D, C:D ratio
-9. gather and make violin plot 
-
+#Read in data
 
 ```{r read_in_data}
 
@@ -46,7 +39,7 @@ dat$VIC <- as.numeric(dat$VIC)
 dat
 
 ```
-
+#Add sampling info (site and date)
 
 ```{r modify_data}
 #select just the sample number
@@ -58,7 +51,7 @@ dat_sites <- merge(dat, site_info, by = "Number")
 #look at data
 dat_sites
 ```
-
+#Calculate CD ratio
 
 ```{r analysis}
 
