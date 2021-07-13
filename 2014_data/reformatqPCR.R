@@ -4,6 +4,7 @@ setwd(dir = "~/Desktop/GitHub/Symbiont_qPCR/2014_data/")
 rm( list = ls())
 graphics.off()
 library(tidyr)
+library(dplyr)
 
 #enter your raw output from the qPCR machine here as csv 
 data <- read.csv("rawdata/06_29_21_ahyacC56,C57,C64-68,D78,D80-82_threshold50.csv", header = F)
