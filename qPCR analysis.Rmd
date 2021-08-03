@@ -19,6 +19,7 @@ library(mosaic)
 library(RColorBrewer)
 library(DescTools)
 library(epitools)
+library(patchwork)
 ```
 
 Background: These data show the ratio of species 'C' and 'D' symbionts, cell number of each symbiont, and proportion of each symbiont within corals from different sites. I want to test if symbionts are different by site (which I'm pretty sure they are based on the graph but would like to stats to show it)
@@ -59,13 +60,117 @@ dat <- mutate(dat, Site = derivedFactor(
 
 dat <- dat[!is.na(dat$Site),]
 ```
+```{r notlog}
+dat_trip <- dat %>%
+  group_by(Sample, Site) %>%
+  summarize(FAM_mean = mean(FAM, na.rm = TRUE), VIC_mean = mean(VIC, na.rm = TRUE))
 
+#look at data
+dat_trip
+
+#use this formula to calculate cell number for C and D
+#divide by cell copy number 
+dat_trip$cellnum_C <- (2^(40 - dat_trip$VIC_mean)) / 9
+dat_trip$cellnum_C[is.na(dat_trip$VIC_mean)] <- (2^(40-10000000000000))
+dat_trip$cellnum_D <- (2^(40 - dat_trip$FAM_mean)) / 1
+
+
+#look at data
+dat_trip
+
+#calculate proportion of C and D
+dat_trip$D_prop <- dat_trip$cellnum_D / (dat_trip$cellnum_C + dat_trip$cellnum_D)
+dat_trip$C_prop <- dat_trip$cellnum_C / (dat_trip$cellnum_C + dat_trip$cellnum_D)
+
+#look at data
+dat_trip
+
+#calculate C to D ratio
+dat_trip$CDratio_log <- log(dat_trip$cellnum_C / dat_trip$cellnum_D)
+
+#look at data
+dat_trip
+
+#choose bottom baseline for 100% D
+dat_trip$CDratio_log[dat_trip$CDratio_log == -Inf] <- -20
+dat_trip
+
+colors = c("royalblue2", "palegreen2", "lightblue", "tomato3", "firebrick4")
+
+#plot C:D log ratio
+ggplot(dat_trip, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, position = position_jitter(width = 0.001), size = 3.5, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" ))+ scale_color_manual(values = colors) + scale_fill_manual(values = colors)
+#ggsave("figures/CDratio_2019.png", width = 7, height = 5)
+
+
+dat_ratio <- dat_trip %>%
+  group_by(Sample) %>%
+  summarize(D_prop = (D_prop), C_prop = (C_prop))
+
+dat_ratio <- gather(dat_ratio, "Species", "Ratio", 2:3)
+dat_ratio$logRatio <- dat_ratio$Ratio
+
+#plot props for each coral
+ggplot(dat_ratio, aes(x = Sample, y = logRatio, fill = Species)) + geom_col() + theme_bw()  + ylab("Log Proportion of Durisdinium and Cladocopium") + scale_fill_manual(labels = c("Cladocopium", "Durisdinium"), values = c("violetred2", "royalblue3")) + xlab("") + theme(legend.title = element_blank()) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+#ggsave("figures/CDproportions_eachcoral_2019.png", width = 6, height = 4)
+
+dat_ratio_means <- dat_trip %>%
+  group_by(Site) %>%
+  summarize(D_prop_avg = mean(D_prop), C_prop_avg = mean(C_prop))
+
+dat_ratio_means <- gather(dat_ratio_means, "Species", "Ratio", 2:3)
+dat_ratio_means$logRatio <- dat_ratio_means$Ratio
+
+
+#plots mean proportions for each site
+ggplot(dat_ratio_means, aes(x = Site, y = logRatio, fill = Species)) + geom_col() + theme_bw()  + ylab("Log Proportion of Durisdinium and Cladocopium") + scale_fill_manual(labels = c("Cladocopium", "Durisdinium"), values = c("violetred2", "royalblue3")) + xlab("") + theme(legend.title = element_blank())+ scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" ))
+#ggsave("figures/CDproportions_2019.png", width = 6, height = 4)
+
+
+#write.csv(dat_trip, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/cleandata/symbiont_log_ratios_07_17_21.csv", row.names = F)
+
+```
+
+#compare to 2014
+```{r}
+#2019
+dat_ratio_site <- dat_trip %>%
+  group_by(Site) %>%
+  summarise(CD_logratio = mean(CDratio_log))
+dat_ratio_site$year <- "2019"
+
+dat_ratio_site$Site <- factor(dat_ratio_site$Site,levels = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point"))
+
+
+#2014
+ratio_means_2014 <- read.csv("CRCP_2014/site_level_CDratio_2014.csv")
+ratio_means_2014$year <- "2014"
+
+ratio_means_2014$Site <- factor(ratio_means_2014$Site,levels = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point"))
+
+colors = c("royalblue2", "lightblue", "palegreen2", "tomato3", "firebrick4")
+
+d2019 <- ggplot(dat_ratio_site, aes(x = Site, y = CD_logratio, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size = 10, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors) + scale_fill_manual(values = colors) + ylim(-21,1)
+
+d2014 <- ggplot(ratio_means_2014, aes(x = Site, y = CD_logratio, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size =10, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors) + scale_fill_manual(values = colors)+ ylim(-21,1)
+
+ggarrange(d2014, d2019)
+
+#ggsave("figures/compare_2019_2014_crcp_sitelevel.png", width = 12, height = 5)
+
+
+```
+
+
+
+
+
+#I dont think this one is ideal- not meant to log transform data at beginning. Above method produces ratios in line with CRCP report 
 ```{r}
 #try log transforming ct values first, then calc after
 
-dat_log <- dat
-dat_log$FAM_log <- log10(dat_log$FAM)
-dat_log$VIC_log <- log10(dat_log$VIC)
+#dat_log <- dat
+#dat_log$FAM_log <- log10(dat_log$FAM)
+#dat_log$VIC_log <- log10(dat_log$VIC)
 
 
 dat_ratio_log <- dat_log %>%

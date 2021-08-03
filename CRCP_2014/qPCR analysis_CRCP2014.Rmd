@@ -1,0 +1,182 @@
+---
+title: "qPCR analysis"
+author: "Melissa Naugle"
+date: "3/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+setwd(dir = "~/Desktop/GitHub/Symbiont_qPCR/CRCP_2014/")
+rm( list = ls())
+graphics.off()
+library(reshape2)
+library(DescTools)
+library(epitools)
+library(patchwork)
+library(tidyverse)
+library(mosaic)
+```
+
+Background: These data show the ratio of species 'C' and 'D' symbionts, cell number of each symbiont, and proportion of each symbiont within corals from different sites. I want to test if symbionts are different by site (which I'm pretty sure they are based on the graph but would like to stats to show it)
+
+
+# Read in data
+
+```{r readdata}
+dat <- read.csv("TomSCLERA_SamplesAH10_to_AH101.csv")
+
+#check that all neg controls are negative
+dat[dat$Task == "NTC",]
+
+#remove negative controls
+dat<-dat[!(dat$Task=="NTC"),]
+
+#match with site info
+
+#parse out AH colony number
+dat$Number <- parse_number(dat$Sample.Name)
+
+#read in site info
+site_info <- read.csv("../2014_data/2014 Ahyac sample info - Sheet1.csv")
+
+dat_sites <- merge(dat, site_info, by = "Number")
+
+#check that all numbers had a site 
+dat_sites[is.na(dat_sites$Site),]
+
+dat_sites
+
+#take out march sample- only keep july
+dat_sites<-dat_sites[(dat_sites$Season=="July"),]
+
+dat_sites
+
+
+dat_sites$C..Mean <- NULL
+dat_sites$C..SD <- NULL
+dat_sites$Target.Name <- NULL
+dat_sites$Baseline.End <- NULL
+dat_sites$Baseline.Start <- NULL
+
+data <- spread(dat_sites, Reporter, C.)
+
+data$FAM[data$FAM == "Undetermined"] <- NA
+data$VIC[data$VIC == "Undetermined"] <- NA
+
+data
+
+data$FAM <- as.numeric(data$FAM)
+data$VIC <- as.numeric(data$VIC)
+```
+from what I can tell, C mean is the Ct mean of the 2 replicates 
+
+I'll use this value to calculate the CD ratios 
+
+```{r notlog}
+dat_dup <- data %>%
+  group_by(Number, Site) %>%
+  summarize(FAM_mean = mean(FAM, na.rm = TRUE), VIC_mean = mean(VIC, na.rm = TRUE))
+
+#look at data
+dat_dup
+```
+
+
+
+```{r }
+#use this formula to calculate cell number for C and D
+#divide by cell copy number 
+dat_dup$cellnum_C <- (2^(40 - dat_dup$VIC_mean)) / 9
+dat_dup$cellnum_C[is.na(dat_dup$VIC_mean)] <- (2^(40-10000000000000))
+dat_dup$cellnum_D <- (2^(40 - dat_dup$FAM_mean)) / 1
+
+
+#look at data
+dat_dup
+
+#calculate proportion of C and D
+dat_dup$D_prop <- dat_dup$cellnum_D / (dat_dup$cellnum_C + dat_dup$cellnum_D)
+dat_dup$C_prop <- dat_dup$cellnum_C / (dat_dup$cellnum_C + dat_dup$cellnum_D)
+
+#look at data
+dat_dup
+
+#calculate C to D ratio
+dat_dup$CDratio_log <- log(dat_dup$cellnum_C / dat_dup$cellnum_D)
+
+#look at data
+dat_dup
+
+#choose bottom baseline for 100% D
+dat_dup$CDratio_log[dat_dup$CDratio_log == -Inf] <- -20
+dat_dup
+
+dat_dup$Site <- factor(dat_dup$Site,levels = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point"))
+
+
+colors = c("royalblue2", "palegreen2", "lightblue", "tomato3", "firebrick4", "white")
+
+#plot C:D log ratio
+ggplot(dat_dup, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size = 3.5, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15)) + scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" ))+ scale_color_manual(values = colors) + scale_fill_manual(values = colors)
+#ggsave("CDratio_2014_crcp_07_18_21.png", width = 7, height = 5)
+
+
+dat_ratio <- dat_dup %>%
+  group_by(Number) %>%
+  summarize(D_prop = (D_prop), C_prop = (C_prop))
+
+dat_ratio <- gather(dat_ratio, "Species", "Ratio", 2:3)
+dat_ratio$logRatio <- dat_ratio$Ratio
+
+#plot props for each coral
+ggplot(dat_ratio, aes(x = Number, y = logRatio, fill = Species)) + geom_col() + theme_bw()  + ylab("Log Proportion of Durisdinium and Cladocopium") + scale_fill_manual(labels = c("Cladocopium", "Durisdinium"), values = c("violetred2", "royalblue3")) + xlab("") + theme(legend.title = element_blank()) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+#ggsave("figures/CDproportions_eachcoral_2019.png", width = 6, height = 4)
+
+dat_ratio_means <- dat_dup %>%
+  group_by(Site) %>%
+  summarize(D_prop_avg = mean(D_prop), C_prop_avg = mean(C_prop))
+
+dat_ratio_means <- gather(dat_ratio_means, "Species", "Ratio", 2:3)
+dat_ratio_means$logRatio <- dat_ratio_means$Ratio
+
+
+#plots mean proportions for each site
+ggplot(dat_ratio_means, aes(x = Site, y = logRatio, fill = Species)) + geom_col() + theme_bw()  + ylab("Log Proportion of Durisdinium and Cladocopium") + scale_fill_manual(labels = c("Cladocopium", "Durisdinium"), values = c("violetred2", "royalblue3")) + xlab("") + theme(legend.title = element_blank())+ scale_x_discrete(limits = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point" ))
+#ggsave("figures/CDproportions_2019.png", width = 6, height = 4)
+
+
+#write.csv(dat_dup, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/CRCP_2014/crcp_fromtom_symbiont_log_ratios_07_16_21.csv", row.names = F)
+
+```
+
+#compare to 2014
+#colony level as of 7/18 
+```{r}
+#2019
+dat_trip <- read.csv("../cleandata/symbiont_log_ratios_07_17_21.csv")
+
+dat_trip$year <- "2019"
+
+dat_trip$Site <- factor(dat_trip$Site,levels = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point"))
+
+
+#2014
+dat_dup <- read.csv("crcp_fromtom_symbiont_log_ratios_07_16_21.csv")
+dat_dup$year <- "2014"
+
+dat_dup$Site <- factor(dat_dup$Site,levels = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point"))
+dat_dup <- dat_dup[!(is.na(dat_dup$Site)),]
+colors = c("royalblue2", "lightblue", "palegreen2", "tomato3", "firebrick4")
+colors1 = c("lightblue", "palegreen2","firebrick4")
+
+d2019 <- ggplot(dat_trip, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size = 8, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors) + scale_fill_manual(values = colors) + ylim(-21,5) + ggtitle("2019")
+
+d2014 <- ggplot(dat_dup, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size =8, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors1) + scale_fill_manual(values = colors1)+ ylim(-21,5)+ ggtitle("2014")
+
+ggarrange(d2014, d2019)
+
+ggsave("compare_2019_2014_crcp_colonylevel_titles.png", width = 12, height = 5)
+
+```
+
+
