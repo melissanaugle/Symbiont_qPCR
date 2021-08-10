@@ -47,7 +47,7 @@ dat_sites[is.na(dat_sites$Site),]
 dat_sites
 
 #take out march sample- only keep july
-dat_sites<-dat_sites[(dat_sites$Season=="July"),]
+#dat_sites<-dat_sites[(dat_sites$Season=="July"),]
 
 dat_sites
 
@@ -74,15 +74,14 @@ I'll use this value to calculate the CD ratios
 
 ```{r notlog}
 dat_dup <- data %>%
-  group_by(Number, Site) %>%
+  group_by(Number, Site, Season) %>%
   summarize(FAM_mean = mean(FAM, na.rm = TRUE), VIC_mean = mean(VIC, na.rm = TRUE))
 
 #look at data
 dat_dup
 ```
 
-
-
+#####Needs revision as of 08/05/2021
 ```{r }
 #use this formula to calculate cell number for C and D
 #divide by cell copy number 
@@ -111,6 +110,9 @@ dat_dup
 dat_dup$CDratio_log[dat_dup$CDratio_log == -Inf] <- -20
 dat_dup
 
+
+#write.csv(dat_dup, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/CRCP_2014/crcp_fromtom_symbiont_log_ratios_allsites_08_05_21.csv", row.names = F)
+
 dat_dup$Site <- factor(dat_dup$Site,levels = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point"))
 
 
@@ -133,7 +135,7 @@ ggplot(dat_ratio, aes(x = Number, y = logRatio, fill = Species)) + geom_col() + 
 #ggsave("figures/CDproportions_eachcoral_2019.png", width = 6, height = 4)
 
 dat_ratio_means <- dat_dup %>%
-  group_by(Site) %>%
+  group_by(Site, Season) %>%
   summarize(D_prop_avg = mean(D_prop), C_prop_avg = mean(C_prop))
 
 dat_ratio_means <- gather(dat_ratio_means, "Species", "Ratio", 2:3)
@@ -145,7 +147,7 @@ ggplot(dat_ratio_means, aes(x = Site, y = logRatio, fill = Species)) + geom_col(
 #ggsave("figures/CDproportions_2019.png", width = 6, height = 4)
 
 
-#write.csv(dat_dup, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/CRCP_2014/crcp_fromtom_symbiont_log_ratios_07_16_21.csv", row.names = F)
+#write.csv(dat_dup, "/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/CRCP_2014/crcp_fromtom_symbiont_log_ratios_08_05_21.csv", row.names = F)
 
 ```
 
@@ -153,30 +155,67 @@ ggplot(dat_ratio_means, aes(x = Site, y = logRatio, fill = Species)) + geom_col(
 #colony level as of 7/18 
 ```{r}
 #2019
-dat_trip <- read.csv("../cleandata/symbiont_log_ratios_07_17_21.csv")
+dat_trip <- read.csv("../cleandata/symbiont_log_ratios_08_05_21_LBSP.csv")
 
-dat_trip$year <- "2019"
+dat_trip$season_year <- "August 2019"
 
 dat_trip$Site <- factor(dat_trip$Site,levels = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point"))
 
 
 #2014
-dat_dup <- read.csv("crcp_fromtom_symbiont_log_ratios_07_16_21.csv")
-dat_dup$year <- "2014"
+dat_dup <- read.csv("crcp_fromtom_symbiont_log_ratios_allsites_08_05_21_LBSP.csv")
+dat_dup$season_year <- paste(dat_dup$Season, "2014")
 
 dat_dup$Site <- factor(dat_dup$Site,levels = c("Faga'tele","Vatia" ,"Faga'alu","Cannery","Coconut Point"))
 dat_dup <- dat_dup[!(is.na(dat_dup$Site)),]
+
+dat_dup_march <- subset(dat_dup, season_year == "March 2014")
+dat_dup_july <- subset(dat_dup, season_year == "July 2014")
+
+#update these when all sites 
 colors = c("royalblue2", "lightblue", "palegreen2", "tomato3", "firebrick4")
 colors1 = c("lightblue", "palegreen2","firebrick4")
+colors2 = c("royalblue2", "palegreen2","tomato3")
 
-d2019 <- ggplot(dat_trip, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size = 8, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors) + scale_fill_manual(values = colors) + ylim(-21,5) + ggtitle("2019")
+d2019 <- ggplot(dat_trip, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size = 8, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors) + scale_fill_manual(values = colors) + ylim(-21,21) + ggtitle("August 2019")
 
-d2014 <- ggplot(dat_dup, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size =8, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors1) + scale_fill_manual(values = colors1)+ ylim(-21,5)+ ggtitle("2014")
+d2014_march <- ggplot(dat_dup_march, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size =8, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors2) + scale_fill_manual(values = colors2)+ ylim(-21,21)+ ggtitle("March 2014")
 
-ggarrange(d2014, d2019)
+d2014_july <- ggplot(dat_dup_july, aes(x = Site, y = CDratio_log, fill = Site)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_point(shape = 21, size =8, aes(fill = Site))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ scale_color_manual(values = colors1) + scale_fill_manual(values = colors1)+ ylim(-21,21)+ ggtitle("July 2014")
 
-ggsave("compare_2019_2014_crcp_colonylevel_titles.png", width = 12, height = 5)
+d2014_march + d2014_july + d2019
+
+ggsave("compare_2019_2014_crcp_colonylevel_titles_marchincluded_new.png", width = 15, height = 5)
 
 ```
 
+
+
+```{r}
+dat_trip <- read.csv("../cleandata/symbiont_log_ratios_08_05_21_LBSP.csv")
+dat_trip$season_year <- "August 2019"
+dat_trip$LBSP <- factor(dat_trip$LBSP,levels = c("Low","Moderate" ,"High"))
+dat_dup <- read.csv("crcp_fromtom_symbiont_log_ratios_allsites_08_05_21_LBSP.csv")
+dat_dup$season_year <- paste(dat_dup$Season, "2014")
+dat_dup <- dat_dup[!(is.na(dat_dup$Site)),]
+dat_dup$LBSP <- factor(dat_dup$LBSP,levels = c("Low","Moderate" ,"High"))
+dat_dup_march <- subset(dat_dup, season_year == "March 2014")
+dat_dup_july <- subset(dat_dup, season_year == "July 2014")
+
+
+
+d2019 <- ggplot(dat_trip, aes(x = LBSP, y = CDratio_log, fill = LBSP)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("")  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15)) + ylim(-21,21) + ggtitle("August 2019")+geom_jitter(shape = 21, size = 4, aes(fill = LBSP)) 
+
+d2014_march <- ggplot(dat_dup_march, aes(x = LBSP, y = CDratio_log, fill = LBSP)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_jitter(shape = 21, size =4, aes(fill = LBSP))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ ylim(-21,21)+ ggtitle("March 2014")
+
+d2014_july <- ggplot(dat_dup_july, aes(x = LBSP, y = CDratio_log, fill = LBSP)) + geom_violin() + theme_bw() + ylab("Log Cladocopium:Durisdinium Ratio") + xlab("") + geom_jitter(shape = 21, size =4, aes(fill = LBSP))  +theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1), axis.title.x = element_text(size = 15))+ ylim(-21,21)+ ggtitle("July 2014")
+
+d2014_march + d2014_july + d2019
+
+ggsave("compare_2019_2014_LBSP_08_05_2021.png", width = 15, height = 5)
+
+
+###bin by poll level and plot 
+
+```
 

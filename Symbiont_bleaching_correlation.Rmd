@@ -15,7 +15,10 @@ library(ggpubr)
 require(plyr)
 library(dplyr)
 library(corrplot)
+```
 
+
+```{r }
 pam <- read.csv("/Users/Melissa/Desktop/GitHub/CBASS_bleachingdata/raw data sheets/PAM_data_normalized.csv")
 pam$SiteColony <- paste(pam$Site, pam$Colony)
 pam$t35_normalizedto28_pam <- pam$t35_normalizedto28
@@ -37,7 +40,7 @@ symbionts <- read.csv("/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/cleandata/sym
 Colony <- data.frame(do.call('rbind', strsplit(as.character(symbionts$Sample), "F", fixed = T)))
 symbionts$Colony <- Colony$X2
 symbionts$SiteColony <- paste(symbionts$Site, symbionts$Colony)
-symbionts <- select(symbionts, "SiteColony", "D_prop", "C_prop", "cellnum_D", "cellnum_C")
+symbionts <- select(symbionts, "SiteColony", "D_prop", "C_prop", "cellnum_D", "cellnum_C", "CDratio_log")
 
 data <- merge(pam, avgred, all = T)
 data <- merge(data, symbionts, all = T)
@@ -59,8 +62,39 @@ cor.test(data$C_prop, data$mean_t35_normalizedto28_pam, method = "spearman")
 ```
 
 
+#Two-variable metric plotted against symbiont community to look for correlation 
+try prop C and C:D ratio
+
+```{r}
+twovar_thermotol <- read.csv("../CBASS_bleachingdata/CRCP_2014/UniqueColony_SCLERAModeling_2019_v1.5.csv")
+
+symbionts <- read.csv("/Users/Melissa/Desktop/GitHub/Symbiont_qPCR/cleandata/symbiont_log_ratios_07_17_21.csv")
+#add colony number to symbiont sheet
+Colony <- data.frame(do.call('rbind', strsplit(as.character(symbionts$Sample), "F", fixed = T)))
+symbionts$Colony <- Colony$X2
+symbionts$Site_Col <- paste0(symbionts$Site,"_", symbionts$Colony)
+symbionts <- select(symbionts, "Site_Col", "D_prop", "C_prop", "cellnum_D", "cellnum_C", "CDratio_log")
+
+data_sym_tt <- merge(twovar_thermotol, symbionts, all = T)
+
+ggplot(data_sym_tt, aes(x=C_prop, y = Phenotype.X0.mn, col = Site)) + geom_point() + xlab("Log Proportion of Cladocopium") + ylab("Two Variable Thermotolerance \n higher = more thermotol") + theme_bw() + xlim(0, 0.045) + ggtitle("Log prop C by thermotolerance \n missing one outlier with high C prop")
+
+#looks better
+ggplot(data_sym_tt, aes(x= CDratio_log, y = Phenotype.X0.mn, col = Site)) + geom_point(size = 5) + xlab("Log C:D Ratio \n left = more D, right = more C") + ylab("Two Variable Thermotolerance \n higher = more thermotol") + theme_bw() + ggtitle("Log C:D ratio by two-metric thermotolerance")
+
+ggsave("figures/LogCDratio_twometricthermotolerance_2019_08_04_2021.jpg")
+
+#CWC
+ggplot(data_sym_tt, aes(x= CDratio_log, y = CWC3.X0, col = Site)) + geom_point(size = 5) + xlab("Log C:D Ratio \n left = more D, right = more C") + ylab("Color Watch Card \n higher = more thermotol") + theme_bw() + ggtitle("Log C:D ratio by Color Watch Card")
 
 
+ggsave("figures/LogCDratio_cwc_2019_08_04_2021.jpg")
+
+#red intensity
+ggplot(data_sym_tt, aes(x= CDratio_log, y = ARed.X0, col = Site)) + geom_point(size = 5) + xlab("Log C:D Ratio \n left = more D, right = more C") + ylab("Red Intensity \n higher = more thermotol") + theme_bw() + ggtitle("Log C:D ratio by Red Intensity")
+
+ggsave("figures/LogCDratio_redintensity_2019_08_04_2021.jpg")
+```
 
 
 

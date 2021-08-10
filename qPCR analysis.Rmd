@@ -38,6 +38,7 @@ nrow(dat)
 #remove and replace with redos 
 dat<-dat[!(dat$Sample=="Alu_F2" | dat$Sample=="TeleF5" | dat$Sample=="VatiaF6"),]
 
+#AluF4 had only 1/3 amplify 
 dat3 <- dat3[!(dat3$Sample=="AluF4"),]
 dat3$Starting.Quantity..SQ. <- NULL
 dat <- rbind(dat,dat3)
